@@ -758,6 +758,7 @@ in
 
     _internal.warnings.no-displayManager =
       let
+        dmConf = cfg.displayManager;
         noDisplayManager =
           !(
             config.services.greetd.enable
@@ -765,7 +766,7 @@ in
             || config.services.displayManager.sddm.enable
             || config.services.displayManager.ly.enable
             || config.services.displayManager.cosmic-greeter.enable
-            || config.services.xserver.displayManager.lightdm.enable
+            || dmConf.lightdm.enable
             || dmConf.xpra.enable
             || dmConf.sx.enable
             || dmConf.startx.enable
