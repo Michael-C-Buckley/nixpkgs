@@ -756,7 +756,8 @@ in
   config = mkIf cfg.enable {
     services.displayManager.enable = true;
 
-    _internal.warnings.no-displayManager =
+    # Warns the user if there is no DM but a DE configured without changing the options
+    services.xserver.displayManager.lightdm.enable =
       let
         dmConf = cfg.displayManager;
         noDisplayManager =
@@ -785,8 +786,7 @@ in
           A desktop environment is configured but no diplay manager (aka login manager) is enabled.
           This will boot into a TTY and all Desktop sessions will need to be manually launched.
           If not intended, consider enabling a display manager such as GDM, SDDM, or LightDM found under `services.displayManager`.
-        '' true
-      );
+        '' (lib.mkOverride 1555 false));
 
     services.xserver.videoDrivers = mkIf (cfg.videoDriver != null) [ cfg.videoDriver ];
 
