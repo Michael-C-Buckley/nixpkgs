@@ -756,21 +756,36 @@ in
   config = mkIf cfg.enable {
     services.displayManager.enable = true;
 
-    services.xserver.displayManager.lightdm.enable =
+    _internal.warnings.no-displayManager =
       let
-        dmConf = cfg.displayManager;
-        default =
+        noDisplayManager =
           !(
-            config.services.displayManager.gdm.enable
+            config.services.greetd.enable
+            || config.services.displayManager.gdm.enable
             || config.services.displayManager.sddm.enable
+            || config.services.displayManager.ly.enable
+            || config.services.displayManager.cosmic-greeter.enable
+            || config.services.xserver.displayManager.lightdm.enable
             || dmConf.xpra.enable
             || dmConf.sx.enable
             || dmConf.startx.enable
-            || config.services.greetd.enable
-            || config.services.displayManager.ly.enable
           );
+        hasDesktopEnvironment = (
+          config.services.desktopManager.gnome.enable
+          || config.services.desktopManager.plasma6.enable
+          || config.services.xserver.desktopManager.plasma5.enable
+          || config.services.desktopManager.cosmic.enable
+          || config.services.xserver.desktopManager.xfce.enable
+        );
+
       in
-      mkIf (default) (mkDefault true);
+      lib.mkIf (noDisplayManager && hasDesktopEnvironment) (
+        lib.warn ''
+          A desktop environment is configured but no diplay manager (aka login manager) is enabled.
+          This will boot into a TTY and all Desktop sessions will need to be manually launched.
+          If not intended, consider enabling a display manager such as GDM, SDDM, or LightDM found under `services.displayManager`.
+        '' true
+      );
 
     services.xserver.videoDrivers = mkIf (cfg.videoDriver != null) [ cfg.videoDriver ];
 
